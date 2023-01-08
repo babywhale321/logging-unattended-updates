@@ -4,7 +4,7 @@ A script that can be ran with crontab to output a log file after updating/upgrad
 
 # Workflow
 
-1, updates and upgrades.
+1, updates, upgrades, autoremove, autoclean.
 
 2, check if a reboot is required.
 
