@@ -1,38 +1,35 @@
 #!/bin/bash
 
-# Update the package list
-apt update
+#Create a log file to track updates
+logfile="/var/log/update-upgrade.log"
 
-# Upgrade all installed packages and resolve dependencies
-apt upgrade -y
+#Check if the log file exists, and if not create it
+if [ ! -e "$logfile" ] ; then
+   touch "$logfile"
+fi
 
-# Remove unused dependencies
-apt autoremove -y
+#Write the current date and time to the log file
+echo -e "\033[1mDate: $(date)\033[0m" >> "$logfile"
 
-# Clean up the package cache
-apt autoclean
+#Write the results of the update to the log file
+echo -e "\033[1mUpdate Results:\033[0m" >> "$logfile"
+sudo apt update -y | tee -a "$logfile"
 
+#Write the results of the upgrade to the log file
+echo -e "\033[1mUpgrade Results:\033[0m" >> "$logfile"
+sudo apt upgrade -y | tee -a "$logfile"
 
-# Check if a reboot is required
-if [[ -f /var/run/reboot-required ]]; then
-    # Get the reason for the reboot
-    reboot_reason=$(cat /var/run/reboot-required.pkgs)
+#Write the results of the autoremove to the log file
+echo -e "\033[1mAutoremove Results:\033[0m" >> "$logfile"
+sudo apt autoremove -y | tee -a "$logfile"
 
-    # Write a message to the log file
-    if [[ ! -f /var/log/update-upgrade.log ]]; then
-        # Create the log file
-        touch /var/log/update-upgrade.log
-    fi
-    echo "System will reboot at $(date) for the following reason: $reboot_reason" >> /var/log/update-upgrade.log
+#Write the results of the autoclean to the log file
+echo -e "\033[1mAutoclean Results:\033[0m" >> "$logfile"
+sudo apt autoclean | tee -a "$logfile"
 
-    # Reboot the system
-    reboot
+if [ -f /var/run/reboot-required ]; then
+  echo -e "\033[1mA reboot was needed on $(date)\033[0m" | tee -a "$logfile"
+  sudo reboot
 else
-    # No reboot required
-    if [[ ! -f /var/log/update-upgrade.log ]]; then
-        # Create the log file
-        touch /var/log/update-upgrade.log
-    fi
-    echo "No reboot required" >> /var/log/update-upgrade.log
-    echo "No reboot was needed at $(date)" >> /var/log/update-upgrade.log
+  echo -e "\033[1mNo reboot was needed on $(date)\033[0m" | tee -a "$logfile"
 fi
