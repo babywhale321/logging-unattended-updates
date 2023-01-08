@@ -1,10 +1,17 @@
 #!/bin/bash
 
-# Update package list
-apt-get update
+# Update the package list
+apt update
 
-# Upgrade all installed packages
-apt-get upgrade -y
+# Upgrade all installed packages and resolve dependencies
+apt upgrade -y
+
+# Remove unused dependencies
+apt autoremove -y
+
+# Clean up the package cache
+apt autoclean
+
 
 # Check if a reboot is required
 if [[ -f /var/run/reboot-required ]]; then
